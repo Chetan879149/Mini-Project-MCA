@@ -1,120 +1,110 @@
 from kivy.uix.screenmanager import Screen
-from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
+from kivy.properties import StringProperty
 from kivy.clock import Clock
-from kivy.utils import get_color_from_hex
-from kivy.uix.popup import Popup
-
 
 class LoginSignupScreen(Screen):
+    mode = StringProperty("login")  # default login
+    role_selected = StringProperty("Select Role ▼")
+    title_text = StringProperty("Login")
+    switch_text = StringProperty("Don't have an account? Sign up")
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.signup_fields = {}
+        self.role_popup = None
         self.mode = "login"
-        self.build_login()
+
+    def switch_form(self):
+        """Switch between login and signup safely"""
+        if self.mode == "login":
+            self.build_signup()
+        else:
+            self.build_login()
 
     def build_login(self):
-        """Build login form layout"""
-        self.clear_widgets()
+        self.mode = "login"
+        self.title_text = "Login"
+        self.switch_text = "Don't have an account? Sign up"
 
-        layout = BoxLayout(orientation='vertical', spacing=15, padding=40)
-        layout.add_widget(Label(text="Login using Aadhaar ID", font_size='28sp', color=get_color_from_hex("#000000")))
-
-        self.adhar_input = TextInput(hint_text="Aadhaar ID", multiline=False, size_hint=(1, None), height=50)
-        self.dob_input = TextInput(hint_text="Date of Birth (DD/MM/YYYY)", multiline=False, size_hint=(1, None), height=50)
-        self.password_input = TextInput(hint_text="Password", password=True, multiline=False, size_hint=(1, None), height=50)
-
-        layout.add_widget(self.adhar_input)
-        layout.add_widget(self.dob_input)
-        layout.add_widget(self.password_input)
-
-        btn_login = Button(text="Login", size_hint=(1, None), height=50, background_color=(0, 0.6, 0.3, 1))
-        btn_login.bind(on_release=self.validate_login)
-        layout.add_widget(btn_login)
-
-        btn_switch = Button(text="Don’t have an account? Sign up", size_hint=(1, None), height=50,
-                            background_color=(0.3, 0.3, 0.3, 1))
-        btn_switch.bind(on_release=lambda x: self.build_signup())
-        layout.add_widget(btn_switch)
-
-        # back_btn = Button(text="← Back", size_hint=(1, None), height=50,
-        #                   background_color=(0.2, 0.1, 0.1, 1), color=(1, 1, 1, 1))
-        # back_btn.bind(on_release=lambda x: setattr(self.manager, "current", "splash"))
-        # layout.add_widget(back_btn)
-
-        self.add_widget(layout)
+        # Remove any dynamic signup fields
+        for field in self.signup_fields.values():
+            if field.parent:
+                self.ids.form_layout.remove_widget(field)
+        self.signup_fields.clear()
 
     def build_signup(self):
-        """Build signup form layout"""
-        self.clear_widgets()
+        self.mode = "signup"
+        self.title_text = "Sign Up"
+        self.switch_text = "← Back to Login"
 
-        layout = BoxLayout(orientation='vertical', spacing=10, padding=40)
-        layout.add_widget(Label(text="Sign Up", font_size='28sp', color=get_color_from_hex("#000000")))
+        # First, remove previous signup fields if any
+        for field in self.signup_fields.values():
+            if field.parent:
+                self.ids.form_layout.remove_widget(field)
+        self.signup_fields.clear()
 
-        # All necessary fields
-        self.fields = {
-            "First Name": TextInput(hint_text="First Name", multiline=False, size_hint=(1, None), height=45),
-            "Last Name": TextInput(hint_text="Last Name", multiline=False, size_hint=(1, None), height=45),
-            "Email": TextInput(hint_text="Email", multiline=False, size_hint=(1, None), height=45),
-            "Contact": TextInput(hint_text="Contact Number", multiline=False, size_hint=(1, None), height=45),
-            "DOB": TextInput(hint_text="Date of Birth (DD/MM/YYYY)", multiline=False, size_hint=(1, None), height=45),
-            "Aadhaar": TextInput(hint_text="Aadhaar ID", multiline=False, size_hint=(1, None), height=45),
-            "Password": TextInput(hint_text="Password", password=True, multiline=False, size_hint=(1, None), height=45),
-            "Role": TextInput(hint_text="Role (Admin / Doctor / Patient)", multiline=False, size_hint=(1, None), height=45)
-        }
+        # Add signup fields dynamically above the bottom buttons
+        bottom_buttons_count = 2  # Login/Signup switch buttons already in kv
+        field_names = ["First Name", "Last Name", "Email", "Contact Number",
+                       "DOB", "Aadhaar", "Password", "Role"]
 
-        for field in self.fields.values():
-            layout.add_widget(field)
+        for i, name in enumerate(field_names):
+            ti = TextInput(
+                hint_text=name,
+                multiline=False,
+                size_hint_y=None,
+                height=45,
+                background_normal='',
+                background_color=(0.95,0.95,0.95,1),
+                foreground_color=(0,0,0,1),
+                padding=[10,10]
+            )
+            self.signup_fields[name] = ti
+            # Insert **above the bottom buttons** (last 2 widgets in kv)
+            insert_index = len(self.ids.form_layout.children) - bottom_buttons_count
+            self.ids.form_layout.add_widget(ti, index=insert_index)
 
-        signup_btn = Button(text="Sign Up", size_hint=(1, None), height=50, background_color=(0, 0.6, 0.3, 1))
-        signup_btn.bind(on_release=self.validate_signup)
-        layout.add_widget(signup_btn)
-
-        back_btn = Button(text="← Back to Login", size_hint=(1, None), height=50,
-                          background_color=(0.3, 0.3, 0.3, 1))
-        back_btn.bind(on_release=lambda x: self.build_login())
-        layout.add_widget(back_btn)
-
-        self.add_widget(layout)
-
-    def validate_login(self, instance):
-        """Validate login fields"""
-        adhar = self.adhar_input.text.strip()
-        dob = self.dob_input.text.strip()
-        password = self.password_input.text.strip()
-
-        if not adhar or not dob or not password:
-            self.show_popup("Error", "All fields are required.")
+    def toggle_role_dropdown(self):
+        if self.role_popup and self.role_popup.parent:
+            self.role_popup.dismiss()
+            self.role_popup = None
             return
 
-        try:
-            # Dummy validation for now
-            if adhar == "123456789012" and password == "admin":
-                self.show_popup("Success", "Login successful!")
-                Clock.schedule_once(lambda dt: setattr(self.manager, "current", "patient"), 1)
-            else:
-                self.show_popup("Error", "Invalid Aadhaar or Password.")
-        except Exception as e:
-            self.show_popup("Exception", f"An unexpected error occurred: {e}")
+        layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
+        for role in ["Admin","Doctor","Patient"]:
+            btn = Button(text=role, size_hint_y=None, height=40)
+            btn.bind(on_release=lambda x, r=role: self.select_role(r))
+            layout.add_widget(btn)
 
-    def validate_signup(self, instance):
-        """Validate signup fields"""
-        for label, field in self.fields.items():
-            if not field.text.strip():
-                self.show_popup("Error", f"{label} is required.")
-                return
+        from kivy.uix.popup import Popup
+        self.role_popup = Popup(title="Select Role", content=layout, size_hint=(0.5,0.4), auto_dismiss=True)
+        self.role_popup.open()
 
-        try:
-            # Simple demo: success popup
-            self.show_popup("Success", "Account created successfully! Redirecting to login...")
-            Clock.schedule_once(lambda dt: self.build_login(), 2)
-        except Exception as e:
-            self.show_popup("Exception", f"An unexpected error occurred: {e}")
+    def select_role(self, role):
+        self.role_selected = f"{role} ▼"
+        if self.role_popup:
+            self.role_popup.dismiss()
+            self.role_popup = None
 
-    def show_popup(self, title, message):
-        """Show popup for alerts"""
-        popup = Popup(title=title,
-                      content=Label(text=message),
-                      size_hint=(0.4, 0.4))
+    def validate_login(self):
+        adhar = self.ids.adhar_input.text.strip()
+        password = self.ids.password_input.text.strip()
+        role = self.role_selected.replace(" ▼","")
+
+        if not adhar or not password or role not in ["Admin","Doctor","Patient"]:
+            self.show_popup("Error", "All fields are required")
+            return
+
+        if adhar=="123456789012" and password=="admin":
+            self.show_popup("Success", f"Login successful as {role}!")
+        else:
+            self.show_popup("Error","Invalid Aadhaar or Password")
+
+    def show_popup(self,title,message):
+        popup = Popup(title=title, content=Label(text=message), size_hint=(0.4,0.4))
         popup.open()

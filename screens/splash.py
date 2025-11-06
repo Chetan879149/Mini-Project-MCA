@@ -1,32 +1,38 @@
 from kivy.uix.screenmanager import Screen
+from kivy.uix.image import Image
+from kivy.uix.floatlayout import FloatLayout
 from kivy.animation import Animation
 from kivy.clock import Clock
-from kivy.lang import Builder
-from kivy.properties import StringProperty
-import os
 
-# Load KV file
-Builder.load_file(os.path.join("kv", "splash.kv"))
-
-class CircularImageStencil(Screen):
-    source = StringProperty("")  # Add this property for KV binding
+LOGO_FILE = "assets/logo.png"
 
 class SplashScreen(Screen):
     def on_enter(self):
-        logo = self.ids.logo
+        # FloatLayout for free positioning
+        self.layout = FloatLayout()
+        self.add_widget(self.layout)
 
-        # Smooth fade + zoom + slide + spring animation
+        # Logo - bigger initial size
+        self.logo = Image(
+            source=LOGO_FILE,
+            size_hint=(None, None),
+            size=(250, 250),         # bigger starting size
+            opacity=0,
+            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+        )
+        self.layout.add_widget(self.logo)
+
+        # Animation: fade + zoom + move up
         anim = Animation(
-            opacity=0.7,
-            size_hint_x=0.65,
-            size_hint_y=0.65,
-            center_y=logo.center_y + 50,
-            duration=1.5,
+            opacity=1,
+            size=(400, 400),                # zoom bigger
+            y=self.logo.y + 150,            # slide up
+            duration=4,
             t='out_elastic'
         )
-        anim.start(logo)
+        anim.start(self.logo)
 
-        # Switch to login after 3 seconds
+        # Switch to login after animation
         Clock.schedule_once(self.switch_to_next, 3)
 
     def switch_to_next(self, *args):
