@@ -17,7 +17,7 @@ class SplashScreen(Screen):
 
         # Smooth fade + zoom + slide + spring animation
         anim = Animation(
-            opacity=1,
+            opacity=0.7,
             size_hint_x=0.65,
             size_hint_y=0.65,
             center_y=logo.center_y + 50,
