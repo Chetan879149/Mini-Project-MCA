@@ -4,7 +4,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.animation import Animation
 from kivy.clock import Clock
 
-LOGO_FILE = "assets/logo.png"
+LOGO_FILE = "assets/logo.jpg"
 
 class SplashScreen(Screen):
     def on_enter(self):
