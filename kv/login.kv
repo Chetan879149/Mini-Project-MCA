@@ -1,198 +1,196 @@
 <LoginSignupScreen>:
-    FloatLayout:
+    BoxLayout:
+        orientation: 'vertical'
         canvas.before:
             Color:
                 rgba: 1, 1, 1, 1
             Rectangle:
                 pos: self.pos
                 size: self.size
-
-        # Logo
         Image:
             source: "assets/logo2.png"
-            allow_stretch: True
-            keep_ratio: True
             size_hint_y: None
-            height: dp(86)
-            pos_hint: {"top": 0.99, "center_x": 0.5}
+            height: "84dp"
+            allow_stretch: True
+            pos_hint: {"center_x": 0.5}
+        ScreenManager:
+            id: login_views
+            size_hint_y: 1
 
-        # Title
-        Label:
-            text: root.title_text
-            font_size: "26sp"
-            bold: True
-            color: 0.13, 0.49, 0.37, 1
-            pos_hint: {"center_x": 0.5, "center_y": 0.78}
+            Screen:
+                name: 'login_view'
+                BoxLayout:
+                    orientation: 'vertical'
+                    padding: 20
+                    spacing: 10
 
-        # Login / Signup Form
-        BoxLayout:
-            id: form_layout
-            orientation: "vertical"
-            size_hint: 0.85, None
-            height: dp(330)
-            pos_hint: {"center_x": 0.5, "center_y": 0.43}
-            spacing: 11
+                    TextInput:
+                        id: adhar_input
+                        hint_text: 'Aadhar No.'
+                        size_hint_y: None
+                        height: 40
+                    
+                    TextInput:
+                        id: password_input
+                        hint_text: 'Password'
+                        password: True
+                        size_hint_y: None
+                        height: 40
+                    
+                    Spinner:
+                        id: role_spinner
+                        text: 'Select Role'
+                        values: ['Admin', 'Doctor', 'Patient']
+                        color: 0, 0, 0, 1
+                        background_color: 1, 1, 1, 1
+                        size_hint_y: None
+                        height: 40
 
-            # Default login fields
-            TextInput:
-                id: adhar_input
-                hint_text: "Aadhar No."
-                multiline: False
-                background_normal: ''
-                background_color: 0.96, 0.99, 0.97, 1
-                foreground_color: 0.13, 0.49, 0.37, 1
-                size_hint_y: None
-                height: dp(40)
-                font_size: '15sp'
-                padding: [10, 10]
-                radius: [6,]
+                    Button:
+                        text: 'Log In'
+                        background_color: (0.12, 0.5, 0.37, 1)
+                        color: 1,1,1,1
+                        size_hint_y: None
+                        height: 42
+                        on_release: root.validate_login()
 
-            TextInput:
-                id: password_input
-                hint_text: "Password"
-                multiline: False
-                password: True
-                background_normal: ''
-                background_color: 0.96, 0.99, 0.97, 1
-                foreground_color: 0.13, 0.49, 0.37, 1
-                size_hint_y: None
-                height: dp(40)
-                font_size: '15sp'
-                padding: [10, 10]
-                radius: [6,]
+                    BoxLayout:
+                        size_hint_y: None
+                        height: 28
 
-            Spinner:
-                id: role_spinner
-                text: "Select Role"
-                values: ["Admin", "Doctor", "Patient"]
-                size_hint_y: None
-                height: dp(30)
-                background_color: 0.13, 0.49, 0.37, 1
-                color: 1, 1, 1, 1
-                font_size: "14sp"
+                        Button:
+                            text: "Forgot password?"
+                            background_color: 0,0,0,0
+                            color: 0.18, 0.34, 0.82, 1
+                            on_release: root.screen_switch('forgot_view')
+                        Button:
+                            text: "Sign Up"
+                            background_color: 0,0,0,0
+                            color: 0.18, 0.34, 0.82, 1
+                            on_release: root.screen_switch('signup_view')
 
-            Button:
-                text: "Log In"
-                size_hint_y: None
-                height: dp(36)
-                background_color: 0.13, 0.49, 0.37, 1
-                color: 1, 1, 1, 1
-                font_size: '16sp'
-                bold: True
-                radius: [8,]
-                on_release: root.validate_login()
+            Screen:
+                name: 'signup_view'
+                BoxLayout:
+                    orientation: 'vertical'
+                    padding: 20
+                    spacing: 10
 
-            BoxLayout:
-                orientation: 'vertical'
-                spacing: 6
-                size_hint_y: None
-                height: dp(60)
-                pos_hint: {"center_x": 0.5}
+                    TextInput:
+                        id: name_input
+                        hint_text: "Name"
+                        size_hint_y: None
+                        height: 38
 
-                Button:
-                    text: "Forgot Password?"
-                    color: 0.18, 0.34, 0.82, 1
-                    background_color: 0, 0, 0, 0
-                    font_size: '14sp'
-                    size_hint_y: None
-                    height: dp(25)
-                    on_release: root.forgot_password()
+                    TextInput:
+                        id: email_input
+                        hint_text: "Email"
+                        size_hint_y: None
+                        height: 38
 
-                Label:
-                    text: "Don’t have an account? [ref=signup][color=#2a5bd7]Sign Up[/color][/ref]"
-                    markup: True
-                    font_size: "14sp"
-                    halign: "center"
-                    valign: "middle"
-                    size_hint_y: None
-                    height: dp(25)
-                    text_size: self.size
-                    on_ref_press: root.switch_form()
+                    TextInput:
+                        id: signup_adhar_input
+                        hint_text: "Aadhar No."
+                        size_hint_y: None
+                        height: 38
 
+                    TextInput:
+                        id: phone_input
+                        hint_text: "Phone number"
+                        size_hint_y: None
+                        height: 38
 
+                    TextInput:
+                        id: signup_password_input
+                        hint_text: "Password"
+                        password: True
+                        size_hint_y: None
+                        height: 38
 
+                    Spinner:
+                        id: signup_role_spinner
+                        text: "Signin as"
+                        values: ["Patient", "Doctor"]  # No Admin
+                        color: 0, 0, 0, 1
+                        background_color: 1, 1, 1, 1
+                        size_hint_y: None
+                        height: 38
 
-# ----------------------------------------------------------
-# Forgot Password Screen
-# ----------------------------------------------------------
-<ForgotPasswordScreen>:
-    FloatLayout:
-        canvas.before:
-            Color:
-                rgba: 1, 1, 1, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
+                    Button:
+                        text: 'Sign Up'
+                        background_color: (0.12, 0.5, 0.37, 1)
+                        color: 1,1,1,1
+                        size_hint_y: None
+                        height: 42
+                        on_release: root.validate_signup()
+                    Button:
+                        text: '← Back'
+                        background_color: 0,0,0,0
+                        color: 0.18, 0.34, 0.82, 1
+                        on_release: root.screen_switch('login_view')
 
-        Label:
-            text: "Forgot Password"
-            font_size: "24sp"
-            bold: True
-            color: 0.13, 0.49, 0.37, 1
-            pos_hint: {"center_x": 0.5, "center_y": 0.85}
+            Screen:
+                name: 'forgot_view'
+                BoxLayout:
+                    orientation: 'vertical'
+                    padding: 20
+                    spacing: 8
 
-        Label:
-            text: "Enter your registered Email ID to receive an OTP"
-            font_size: "14sp"
-            color: 0.3, 0.3, 0.3, 1
-            halign: "center"
-            pos_hint: {"center_x": 0.5, "center_y": 0.77}
-            text_size: self.width * 0.9, None
-
-        TextInput:
-            id: reset_input
-            hint_text: "Email ID"
-            size_hint: 0.8, None
-            height: dp(40)
-            pos_hint: {"center_x": 0.5, "center_y": 0.68}
-            multiline: False
-            background_normal: ''
-            background_color: 0.96, 0.99, 0.97, 1
-            foreground_color: 0.13, 0.49, 0.37, 1
-            font_size: '15sp'
-            padding: [10, 10]
-            radius: [6,]
-
-        Button:
-            text: "Send OTP"
-            size_hint: 0.8, None
-            height: dp(36)
-            pos_hint: {"center_x": 0.5, "center_y": 0.58}
-            background_color: 0.13, 0.49, 0.37, 1
-            color: 1, 1, 1, 1
-            bold: True
-            on_release: root.send_otp()
-
-        TextInput:
-            id: otp_input
-            hint_text: "Enter OTP"
-            size_hint: 0.8, None
-            height: dp(40)
-            pos_hint: {"center_x": 0.5, "center_y": 0.47}
-            multiline: False
-            background_normal: ''
-            background_color: 0.96, 0.99, 0.97, 1
-            foreground_color: 0.13, 0.49, 0.37, 1
-            font_size: '15sp'
-            padding: [10, 10]
-            radius: [6,]
-
-        Button:
-            text: "Verify OTP"
-            size_hint: 0.8, None
-            height: dp(36)
-            pos_hint: {"center_x": 0.5, "center_y": 0.37}
-            background_color: 0.18, 0.34, 0.82, 1
-            color: 1, 1, 1, 1
-            bold: True
-            on_release: root.verify_otp()
-
-        Button:
-            text: "← Back to Login"
-            size_hint: None, None
-            size: dp(150), dp(36)
-            pos_hint: {"center_x": 0.5, "center_y": 0.25}
-            background_color: 0, 0, 0, 0
-            color: 0.18, 0.34, 0.82, 1
-            font_size: '14sp'
-            on_release: app.root.current = "login"
+                    TextInput:
+                        id: forgot_adhar_input
+                        hint_text: "Enter Aadhar"
+                        size_hint_y: None
+                        height: 34
+                    Button:
+                        text: "Get OTP"
+                        background_color: (0.12, 0.5, 0.37, 1)
+                        color: 1,1,1,1
+                        size_hint_y: None
+                        height: 38
+                        on_release: root.send_otp()
+                    Label:
+                        id: otp_notice
+                        text: ""
+                        size_hint_y: None
+                        height: 15
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: 4
+                        size_hint_y: None
+                        height: 34
+                        TextInput:
+                            id: otp1
+                            input_filter: 'int'
+                            size_hint_x: 0.2
+                            font_size: 18
+                            multiline: False
+                        TextInput:
+                            id: otp2
+                            input_filter: 'int'
+                            size_hint_x: 0.2
+                            font_size: 18
+                            multiline: False
+                        TextInput:
+                            id: otp3
+                            input_filter: 'int'
+                            size_hint_x: 0.2
+                            font_size: 18
+                            multiline: False
+                        TextInput:
+                            id: otp4
+                            input_filter: 'int'
+                            size_hint_x: 0.2
+                            font_size: 18
+                            multiline: False
+                    Button:
+                        text: "Confirm"
+                        background_color: 0.18,0.34,0.82,1
+                        color: 1,1,1,1
+                        size_hint_y: None
+                        height: 38
+                        on_release: root.verify_otp()
+                    Button:
+                        text: "← Back"
+                        background_color: 0,0,0,0
+                        color: 0.18, 0.34, 0.82, 1
+                        on_release: root.screen_switch('login_view')
