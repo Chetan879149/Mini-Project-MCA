@@ -1,6 +1,5 @@
 <LoginSignupScreen>:
     FloatLayout:
-        # White background (unchanged)
         canvas.before:
             Color:
                 rgba: 1, 1, 1, 1
@@ -17,110 +16,183 @@
             height: dp(86)
             pos_hint: {"top": 0.99, "center_x": 0.5}
 
-        # Login Title
+        # Title
         Label:
-            text: "Login"
+            text: root.title_text
             font_size: "26sp"
             bold: True
             color: 0.13, 0.49, 0.37, 1
             pos_hint: {"center_x": 0.5, "center_y": 0.78}
 
-        # Centered Form (Card Style)
-        FloatLayout:
+        # Login / Signup Form
+        BoxLayout:
+            id: form_layout
+            orientation: "vertical"
             size_hint: 0.85, None
-            height: dp(300)
+            height: dp(330)
             pos_hint: {"center_x": 0.5, "center_y": 0.43}
+            spacing: 11
 
-            # Soft shadow effect (fake with semi-transparent layer)
-            canvas.before:
-                Color:
-                    rgba: 0, 0, 0, 0.08  # light black shadow
-                RoundedRectangle:
-                    pos: self.x + dp(3), self.y - dp(3)
-                    size: self.width, self.height
-                    radius: [18,]
-                Color:
-                    rgba: 1, 1, 1, 1
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [18,]
-                Color:
-                    rgba: 0.85, 0.85, 0.85, 1
-                Line:
-                    width: 1.2
-                    rounded_rectangle: (self.x, self.y, self.width, self.height, dp(18))
+            # Default login fields
+            TextInput:
+                id: adhar_input
+                hint_text: "Aadhar No."
+                multiline: False
+                background_normal: ''
+                background_color: 0.96, 0.99, 0.97, 1
+                foreground_color: 0.13, 0.49, 0.37, 1
+                size_hint_y: None
+                height: dp(40)
+                font_size: '15sp'
+                padding: [10, 10]
+                radius: [6,]
 
-            # Centered elements inside the card
+            TextInput:
+                id: password_input
+                hint_text: "Password"
+                multiline: False
+                password: True
+                background_normal: ''
+                background_color: 0.96, 0.99, 0.97, 1
+                foreground_color: 0.13, 0.49, 0.37, 1
+                size_hint_y: None
+                height: dp(40)
+                font_size: '15sp'
+                padding: [10, 10]
+                radius: [6,]
+
+            Spinner:
+                id: role_spinner
+                text: "Select Role"
+                values: ["Admin", "Doctor", "Patient"]
+                size_hint_y: None
+                height: dp(30)
+                background_color: 0.13, 0.49, 0.37, 1
+                color: 1, 1, 1, 1
+                font_size: "14sp"
+
+            Button:
+                text: "Log In"
+                size_hint_y: None
+                height: dp(36)
+                background_color: 0.13, 0.49, 0.37, 1
+                color: 1, 1, 1, 1
+                font_size: '16sp'
+                bold: True
+                radius: [8,]
+                on_release: root.validate_login()
+
             BoxLayout:
-                orientation: "vertical"
-                size_hint: None, None
-                size: self.parent.width * 0.9, self.parent.height * 0.9
-                pos_hint: {"center_x": 0.5, "center_y": 0.5}
-                spacing: 11
-
-                TextInput:
-                    hint_text: "Aadhar No."
-                    multiline: False
-                    background_normal: ''
-                    background_color: 0.96, 0.99, 0.97, 1
-                    foreground_color: 0.13, 0.49, 0.37, 1
-                    size_hint_y: None
-                    height: dp(40)
-                    font_size: '15sp'
-                    padding: [10, 10]
-                    radius: [6,]
-
-                TextInput:
-                    hint_text: "Password"
-                    multiline: False
-                    password: True
-                    background_normal: ''
-                    background_color: 0.96, 0.99, 0.97, 1
-                    foreground_color: 0.13, 0.49, 0.37, 1
-                    size_hint_y: None
-                    height: dp(40)
-                    font_size: '15sp'
-                    padding: [10, 10]
-                    radius: [6,]
-
-                Spinner:
-                    text: "Select Role"
-                    values: ["Admin", "Doctor", "Patient"]
-                    size_hint_y: None
-                    height: dp(30)
-                    background_color: 0.13, 0.49, 0.37, 1
-                    color: 1, 1, 1, 1
-                    font_size: "14sp"
+                orientation: 'vertical'
+                spacing: 6
+                size_hint_y: None
+                height: dp(60)
+                pos_hint: {"center_x": 0.5}
 
                 Button:
-                    text: "Log In"
+                    text: "Forgot Password?"
+                    color: 0.18, 0.34, 0.82, 1
+                    background_color: 0, 0, 0, 0
+                    font_size: '14sp'
                     size_hint_y: None
-                    height: dp(36)
-                    background_color: 0.13, 0.49, 0.37, 1
-                    color: 1, 1, 1, 1
-                    font_size: '16sp'
-                    bold: True
-                    radius: [8,]
-                    on_release: root.validate_login()
+                    height: dp(25)
+                    on_release: root.forgot_password()
 
-                BoxLayout:
-                    orientation: 'horizontal'
-                    spacing: 6
+                Label:
+                    text: "Don’t have an account? [ref=signup][color=#2a5bd7]Sign Up[/color][/ref]"
+                    markup: True
+                    font_size: "14sp"
+                    halign: "center"
+                    valign: "middle"
                     size_hint_y: None
-                    height: dp(28)
-                    pos_hint: {"center_x": 0.5}
+                    height: dp(25)
+                    text_size: self.size
+                    on_ref_press: root.switch_form()
 
-                    Button:
-                        text: "Forgot password?"
-                        color: 0.18, 0.34, 0.82, 1
-                        background_color: 0, 0, 0, 0
-                        font_size: '14sp'
-                        size_hint_x: 0.6
 
-                    Button:
-                        text: "Sign In"
-                        color: 0.18, 0.34, 0.82, 1
-                        background_color: 0, 0, 0, 0
-                        font_size: '14sp'
-                        size_hint_x: 0.4
+
+
+# ----------------------------------------------------------
+# Forgot Password Screen
+# ----------------------------------------------------------
+<ForgotPasswordScreen>:
+    FloatLayout:
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: "Forgot Password"
+            font_size: "24sp"
+            bold: True
+            color: 0.13, 0.49, 0.37, 1
+            pos_hint: {"center_x": 0.5, "center_y": 0.85}
+
+        Label:
+            text: "Enter your registered Email ID to receive an OTP"
+            font_size: "14sp"
+            color: 0.3, 0.3, 0.3, 1
+            halign: "center"
+            pos_hint: {"center_x": 0.5, "center_y": 0.77}
+            text_size: self.width * 0.9, None
+
+        TextInput:
+            id: reset_input
+            hint_text: "Email ID"
+            size_hint: 0.8, None
+            height: dp(40)
+            pos_hint: {"center_x": 0.5, "center_y": 0.68}
+            multiline: False
+            background_normal: ''
+            background_color: 0.96, 0.99, 0.97, 1
+            foreground_color: 0.13, 0.49, 0.37, 1
+            font_size: '15sp'
+            padding: [10, 10]
+            radius: [6,]
+
+        Button:
+            text: "Send OTP"
+            size_hint: 0.8, None
+            height: dp(36)
+            pos_hint: {"center_x": 0.5, "center_y": 0.58}
+            background_color: 0.13, 0.49, 0.37, 1
+            color: 1, 1, 1, 1
+            bold: True
+            on_release: root.send_otp()
+
+        TextInput:
+            id: otp_input
+            hint_text: "Enter OTP"
+            size_hint: 0.8, None
+            height: dp(40)
+            pos_hint: {"center_x": 0.5, "center_y": 0.47}
+            multiline: False
+            background_normal: ''
+            background_color: 0.96, 0.99, 0.97, 1
+            foreground_color: 0.13, 0.49, 0.37, 1
+            font_size: '15sp'
+            padding: [10, 10]
+            radius: [6,]
+
+        Button:
+            text: "Verify OTP"
+            size_hint: 0.8, None
+            height: dp(36)
+            pos_hint: {"center_x": 0.5, "center_y": 0.37}
+            background_color: 0.18, 0.34, 0.82, 1
+            color: 1, 1, 1, 1
+            bold: True
+            on_release: root.verify_otp()
+
+        Button:
+            text: "← Back to Login"
+            size_hint: None, None
+            size: dp(150), dp(36)
+            pos_hint: {"center_x": 0.5, "center_y": 0.25}
+            background_color: 0, 0, 0, 0
+            color: 0.18, 0.34, 0.82, 1
+            font_size: '14sp'
+            on_release: app.root.current = "login"
