@@ -1,122 +1,126 @@
 <LoginSignupScreen>:
     FloatLayout:
+        # White background (unchanged)
         canvas.before:
             Color:
-                rgba: 0.12, 0.12, 0.12, 1  # Blackish background
+                rgba: 1, 1, 1, 1
             Rectangle:
                 pos: self.pos
                 size: self.size
 
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint: None, None
-            width: min(370, root.width * 0.92)
-            height: self.minimum_height
-            pos_hint: {'center_x':0.5, 'center_y':0.5}
-            spacing: 30
-            padding: [0, 35, 0, 35]
+        # Logo
+        Image:
+            source: "assets/logo2.png"
+            allow_stretch: True
+            keep_ratio: True
+            size_hint_y: None
+            height: dp(86)
+            pos_hint: {"top": 0.99, "center_x": 0.5}
 
-            # Top Logo
-            Image:
-                source: 'assets/logo2.png'
-                size_hint: None, None
-                size: 220, 70
-                allow_stretch: True
-                pos_hint: {'center_x':0.5}
+        # Login Title
+        Label:
+            text: "Login"
+            font_size: "26sp"
+            bold: True
+            color: 0.13, 0.49, 0.37, 1
+            pos_hint: {"center_x": 0.5, "center_y": 0.78}
 
-            # App Name
-            Label:
-                text: "Login"
-                font_size: '27sp'
-                bold: True
-                color: 0.1, 0.7, 0.5, 1
-                size_hint: None, None
-                size: 200, 40
-                pos_hint: {'center_x':0.5}
+        # Centered Form (Card Style)
+        FloatLayout:
+            size_hint: 0.85, None
+            height: dp(300)
+            pos_hint: {"center_x": 0.5, "center_y": 0.43}
 
-            # Form Box
+            # Soft shadow effect (fake with semi-transparent layer)
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 0.08  # light black shadow
+                RoundedRectangle:
+                    pos: self.x + dp(3), self.y - dp(3)
+                    size: self.width, self.height
+                    radius: [18,]
+                Color:
+                    rgba: 1, 1, 1, 1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [18,]
+                Color:
+                    rgba: 0.85, 0.85, 0.85, 1
+                Line:
+                    width: 1.2
+                    rounded_rectangle: (self.x, self.y, self.width, self.height, dp(18))
+
+            # Centered elements inside the card
             BoxLayout:
-                id: form_layout
-                orientation: 'vertical'
-                size_hint: 1, None
-                height: self.minimum_height
-                padding: [26,24,26,24]
-                spacing: 13
-                canvas.before:
-                    Color:
-                        rgba: 1, 1, 1, 1
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [14,]
+                orientation: "vertical"
+                size_hint: None, None
+                size: self.parent.width * 0.9, self.parent.height * 0.9
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                spacing: 11
 
                 TextInput:
-                    id: adhar_input
                     hint_text: "Aadhar No."
                     multiline: False
                     background_normal: ''
-                    background_color: 0.96,0.99,0.97,1
-                    foreground_color: 0.13,0.49,0.37,1
+                    background_color: 0.96, 0.99, 0.97, 1
+                    foreground_color: 0.13, 0.49, 0.37, 1
                     size_hint_y: None
-                    height: 38
-                    font_size: '17sp'
-                    padding: [15,11]
+                    height: dp(40)
+                    font_size: '15sp'
+                    padding: [10, 10]
                     radius: [6,]
 
                 TextInput:
-                    id: password_input
                     hint_text: "Password"
                     multiline: False
                     password: True
                     background_normal: ''
-                    background_color: 0.96,0.99,0.97,1
-                    foreground_color: 0.13,0.49,0.37,1
+                    background_color: 0.96, 0.99, 0.97, 1
+                    foreground_color: 0.13, 0.49, 0.37, 1
                     size_hint_y: None
-                    height: 38
-                    font_size: '17sp'
-                    padding: [15,11]
+                    height: dp(40)
+                    font_size: '15sp'
+                    padding: [10, 10]
                     radius: [6,]
 
-                Button:
-                    id: role_btn
-                    text: root.role_selected
+                Spinner:
+                    text: "Select Role"
+                    values: ["Admin", "Doctor", "Patient"]
                     size_hint_y: None
-                    height: 38
-                    background_color: 0.13,0.49,0.37,1
-                    color: 1,1,1,1
-                    font_size: '17sp'
-                    radius: [6,]
-                    on_release: root.toggle_role_dropdown()
+                    height: dp(30)
+                    background_color: 0.13, 0.49, 0.37, 1
+                    color: 1, 1, 1, 1
+                    font_size: "14sp"
 
                 Button:
                     text: "Log In"
-                    height: 42
                     size_hint_y: None
-                    background_color: 0.13,0.49,0.37,1
-                    color: 1,1,1,1
-                    font_size: '18sp'
+                    height: dp(36)
+                    background_color: 0.13, 0.49, 0.37, 1
+                    color: 1, 1, 1, 1
+                    font_size: '16sp'
                     bold: True
                     radius: [8,]
                     on_release: root.validate_login()
 
                 BoxLayout:
                     orientation: 'horizontal'
-                    spacing: 4
+                    spacing: 6
                     size_hint_y: None
-                    height: 28
+                    height: dp(28)
+                    pos_hint: {"center_x": 0.5}
 
                     Button:
                         text: "Forgot password?"
-                        color: 0.18,0.34,0.82,1
-                        background_color: 0,0,0,0
+                        color: 0.18, 0.34, 0.82, 1
+                        background_color: 0, 0, 0, 0
                         font_size: '14sp'
                         size_hint_x: 0.6
-                        underline: True
 
                     Button:
                         text: "Sign In"
-                        color: 0.18,0.34,0.82,1
-                        background_color: 0,0,0,0
+                        color: 0.18, 0.34, 0.82, 1
+                        background_color: 0, 0, 0, 0
                         font_size: '14sp'
                         size_hint_x: 0.4
-                        underline: True

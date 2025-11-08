@@ -7,6 +7,7 @@ from kivy.uix.textinput import TextInput
 from kivy.properties import StringProperty
 from kivy.clock import Clock
 
+
 class LoginSignupScreen(Screen):
     mode = StringProperty("login")  # default login
     role_selected = StringProperty("Select Role ▼")
@@ -60,12 +61,11 @@ class LoginSignupScreen(Screen):
                 size_hint_y=None,
                 height=45,
                 background_normal='',
-                background_color=(0.95,0.95,0.95,1),
-                foreground_color=(0,0,0,1),
-                padding=[10,10]
+                background_color=(0.95, 0.95, 0.95, 1),
+                foreground_color=(0, 0, 0, 1),
+                padding=[10, 10]
             )
             self.signup_fields[name] = ti
-            # Insert **above the bottom buttons** (last 2 widgets in kv)
             insert_index = len(self.ids.form_layout.children) - bottom_buttons_count
             self.ids.form_layout.add_widget(ti, index=insert_index)
 
@@ -76,13 +76,13 @@ class LoginSignupScreen(Screen):
             return
 
         layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
-        for role in ["Admin","Doctor","Patient"]:
+        for role in ["Admin", "Doctor", "Patient"]:
             btn = Button(text=role, size_hint_y=None, height=40)
             btn.bind(on_release=lambda x, r=role: self.select_role(r))
             layout.add_widget(btn)
 
         from kivy.uix.popup import Popup
-        self.role_popup = Popup(title="Select Role", content=layout, size_hint=(0.5,0.4), auto_dismiss=True)
+        self.role_popup = Popup(title="Select Role", content=layout, size_hint=(0.5, 0.4), auto_dismiss=True)
         self.role_popup.open()
 
     def select_role(self, role):
@@ -91,20 +91,42 @@ class LoginSignupScreen(Screen):
             self.role_popup.dismiss()
             self.role_popup = None
 
-    def validate_login(self):
-        adhar = self.ids.adhar_input.text.strip()
-        password = self.ids.password_input.text.strip()
-        role = self.role_selected.replace(" ▼","")
+    def on_kv_post(self, base_widget):
+        """Bind Aadhaar input formatting after KV is loaded"""
+        if "adhar_input" in self.ids:
+            self.ids.adhar_input.bind(text=self.format_aadhaar)
 
-        if not adhar or not password or role not in ["Admin","Doctor","Patient"]:
+    def format_aadhaar(self, instance, value):
+        """Automatically add space after every 4 digits"""
+        digits = value.replace(" ", "")
+        formatted = " ".join([digits[i:i+4] for i in range(0, len(digits), 4)])
+        if formatted != value:
+            instance.text = formatted
+            instance.cursor = (len(formatted), 0)
+
+    def validate_login(self):
+        adhar = self.ids.adhar_input.text.strip().replace(" ", "")
+        password = self.ids.password_input.text.strip()
+        role = self.role_selected.replace(" ▼", "")
+
+        if not adhar or not password or role not in ["Admin", "Doctor", "Patient"]:
             self.show_popup("Error", "All fields are required")
             return
 
-        if adhar=="123456789012" and password=="admin":
+        # --- Admin Login ---
+        if role == "Admin":
+            if adhar == "9999" and password == "admin123":
+                self.show_popup("Success", "Admin login successful!")
+            else:
+                self.show_popup("Permission Denied", "You do not have permission to access admin panel.")
+            return
+
+        # --- Normal User Login ---
+        if adhar == "5999" and password == "user123":
             self.show_popup("Success", f"Login successful as {role}!")
         else:
-            self.show_popup("Error","Invalid Aadhaar or Password")
+            self.show_popup("Error", "Invalid Aadhaar or Password")
 
-    def show_popup(self,title,message):
-        popup = Popup(title=title, content=Label(text=message), size_hint=(0.4,0.4))
+    def show_popup(self, title, message):
+        popup = Popup(title=title, content=Label(text=message), size_hint=(0.4, 0.4))
         popup.open()

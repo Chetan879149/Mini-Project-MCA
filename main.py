@@ -12,7 +12,7 @@ from screens.login import LoginSignupScreen
 
 #! Example: Mobile screen size (iPhone 14 approx)
 from kivy.core.window import Window
-Window.size = (290, 570)  # Width x Height in pixels
+Window.size = (250, 540)  # Width x Height in pixels
 
 #! Load KV files (make sure they are inside kv/ folder)
 Builder.load_file("kv/splash.kv")
