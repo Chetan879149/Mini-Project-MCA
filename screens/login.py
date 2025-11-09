@@ -128,7 +128,7 @@ class LoginSignupScreen(Screen):
             }
         )
 
-        # Check status from response object
+        #! Check status from response object
         if response.messages[0].status == "0":
            self.show_popup("OTP Sent", "OTP sent to your registered mobile number.")
         else:
