@@ -1,22 +1,31 @@
 <LoginSignupScreen>:
     FloatLayout:
+        # Add background illustration
         canvas.before:
             Color:
                 rgba: 1, 1, 1, 1
             Rectangle:
                 pos: self.pos
                 size: self.size
+            Color:
+                rgba: 1, 1, 1, 1  # If you want a slight overlay, adjust alpha to e.g. 0.92
+            # The illustration placed bottom left, covering ~45% width, ~60% height
+            Rectangle:
+                source: "assets/login-illustration.jpg"
+                pos: self.x, self.y
+                size: self.width * 0.48, self.height * 0.6
 
         BoxLayout:
             id: card_box
             orientation: 'vertical'
             size_hint: None, None
             width: min(380, root.width * 0.93)
-            height: min(650, root.height * 0.93)  # Increased height to accommodate new screen
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            padding: 24
+            height: min(650, root.height * 0.93)
+            pos_hint: {"center_x": 0.63, "center_y": 0.6}
+            padding: [24, 32, 24, 24]  # More top padding for floating effect
             spacing: 16
 
+            # (The rest of your existing content - keep unchanged)
             Image:
                 source: "assets/logo2.png"
                 size_hint_y: None
@@ -76,7 +85,7 @@
                             Spinner:
                                 id: role_spinner
                                 text: "Select Role"
-                                values: ["Admin", "Doctor", "Patient"]
+                                values: ["User","Admin", "Doctor", "Patient"]
                                 size_hint_y: None
                                 height: 44
                                 background_normal: ""
@@ -198,7 +207,7 @@
                             Spinner:
                                 id: signup_role_spinner
                                 text: "Signin as"
-                                values: ["Patient", "Doctor"]
+                                values: ["User","Patient", "Doctor"]
                                 size_hint_y: None
                                 height: 44
                                 background_normal: ""

@@ -71,7 +71,7 @@ class LoginSignupScreen(Screen):
         password = self.ids.password_input.text.strip()
         role = self.ids.role_spinner.text.strip()
 
-        if not adhar or not password or role not in ['Admin', 'Doctor', 'Patient']:
+        if not adhar or not password or role not in ['User','Admin', 'Doctor', 'Patient']:
             self.show_popup("Error", "Please fill all details and select a valid role.")
             return
 

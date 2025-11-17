@@ -4,14 +4,14 @@ from kivy.core.window import Window
 from kivy.utils import get_color_from_hex
 from kivy.lang import Builder
 
-#! Import Screens
-from screens.splash import SplashScreen
-from screens.login import LoginSignupScreen
+#! Import Screens to manage navigation between them 
+from screens.splash import SplashScreen          #todo: animation code for splash screen
+from screens.login import LoginSignupScreen      #todo: login and signup functionality
 # from screens.patient import PatientScreen
 # from screens.doctor import DoctorScreen
 
-#! Example: Mobile screen size (iPhone 14 approx)
-Window.size = (250, 540)  # Width x Height in pixels
+#! Output Screen Example: Mobile screen size (iPhone 14 approx)
+Window.size = (250, 540)  #! Width x Height in pixels
 
 #! Load KV files (make sure they are inside kv/ folder)
 Builder.load_file("kv/splash.kv")
