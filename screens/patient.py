@@ -60,12 +60,7 @@ class AppointmentsSection(BoxLayout):
             ("Sod Nato", "12:30 PM", "👤"),
             ("Chetan Sharma", "02:00 PM", "👤"),
             ("Harshit Kumar", "3:00 PM", "👤"),
-            ("Atul Tyagi", "03:30 PM", "👤"),
-            ("Monition", "11:15 AM", "👤"),
-            ("Sod Nato", "12:30 PM", "👤"),
-            ("Chetan Sharma", "02:00 PM", "👤"),
-            ("Harshit Kumar", "3:00 PM", "👤"),
-            ("Atul Tyagi", "03:30 PM", "👤"),
+
         ]
         # Populate list dynamically
         for name, time, icon in appointments:
