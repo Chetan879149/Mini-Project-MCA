@@ -1,32 +1,19 @@
 import kivy
 import os
+import random  # Import random to simulate changing vitals
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
-from kivy.uix.anchorlayout import AnchorLayout
-from kivy.graphics import Color, Rectangle
-from kivy.utils import get_color_from_hex
-from kivy.metrics import dp # Import dp for consistent sizing
+from kivy.uix.widget import Widget
+from kivy.properties import StringProperty, ColorProperty
 from kivy.lang import Builder
+from kivy.utils import get_color_from_hex
+from kivy.clock import Clock
+from kivy.uix.screenmanager import Screen
 
-# We need to import the Graph and MeshLinePlot from the garden package
-# Make sure you have installed it first using:
-# pip install kivy-garden
-# kivy garden install graph
+# --- Import Kivy Garden Graph ---
+# Ensure these are installed: pip install kivy-garden && kivy garden install graph
 try:
     from kivy_garden.graph import Graph, MeshLinePlot
-except ImportError:
-    print("Error: kivy_garden.graph not installed.")
-    print("Please run the following commands:")
-    print("pip install kivy-garden")
-    print("kivy garden install graph")
-    exit(1)
-
-kivy.require('2.1.0') # Specify your Kivy version
-# --- Import Kivy Garden Graph ---
-try:
-    from kivy_garden.graph import Graph, MeshLinePlot, MeshStemPlot
 except ImportError:
     print("Error: kivy_garden.graph not installed.")
     print("Run: pip install kivy-garden && kivy garden install graph")
@@ -34,202 +21,84 @@ except ImportError:
 
 kivy.require('2.1.0')
 
-# --- FIX: LOAD KV FILE ROBUSTLY ---
-# This gets the directory where patient.py is located
-current_dir = os.path.dirname(os.path.abspath(__file__))
-# This combines the directory with the filename
-kv_file_path = os.path.join(current_dir, 'kv/patient.kv')
+class VitalBox(BoxLayout):
+    """
+    Custom Widget for the colored vital statistics boxes.
+    Properties are set in the KV file.
+    """
+    title = StringProperty('')
+    value = StringProperty('')
+    unit = StringProperty('')
+    box_color = ColorProperty((0, 0, 0, 1))
 
-try:
-    Builder.load_file("kv/patient.kv")
-except FileNotFoundError:
-    print(f"\nERROR: Could not find 'patient.kv' at: {"kv/patient.kv"}")
-    print("Please ensure patient.kv is in the exact same folder as patient.py\n")
-    exit(1)
+from kivy.clock import Clock
+class PatientScreen(Screen):
+    """
+    Root Widget for the Dashboard.
+    """
+    def on_enter(self):
+        # Wait until the screen is actually entered/visible
+        self.setup_graph()
+        # We delay graph setup slightly to ensure the KV layout is fully loaded
+        Clock.schedule_once(self.setup_graph, 0)
+
+    def setup_graph(self, dt):
+        """
+        Initializes the graph data and adds plots.
+        """
+        # Access the graph widget defined in KV using its ID
+        graph = self.ids.vitals_graph
+
+        # 1. Heart Rate Plot (Red)
+        # We store it as 'self.hr_plot' so we can update it later
+        self.hr_plot = MeshLinePlot(color=get_color_from_hex("#E74C3C"))
+        self.hr_plot.points = [(i, random.randint(70, 85)) for i in range(12)]
+        
+        # 2. Blood Pressure Plot (Blue)
+        # We store it as 'self.bp_plot' so we can update it later
+        self.bp_plot = MeshLinePlot(color=get_color_from_hex("#3498DB"))
+        self.bp_plot.points = [(i, random.randint(110, 130)) for i in range(12)]
+
+        # Add plots to the graph
+        graph.add_plot(self.hr_plot)
+        graph.add_plot(self.bp_plot)
+
+        # --- START DYNAMIC UPDATES ---
+        # Call self.update_graph every 1.0 second
+        Clock.schedule_interval(self.update_graph, 1.0)
+
+    def update_graph(self, dt):
+        """
+        Called every second by the Clock.
+        It shifts data to the left and adds a new random point at the end.
+        """
+        
+        # --- Update Heart Rate ---
+        # 1. Extract just the Y values (heart rates) from the current points
+        current_hr_y = [point[1] for point in self.hr_plot.points]
+        # 2. Remove the first (oldest) value and add a new random value at the end
+        new_hr_y = current_hr_y[1:] + [random.randint(70, 90)]
+        # 3. Rebuild the list of (x, y) tuples. 'i' is the X axis (0 to 11)
+        self.hr_plot.points = [(i, y) for i, y in enumerate(new_hr_y)]
+
+        # --- Update Blood Pressure ---
+        # Same logic as above
+        current_bp_y = [point[1] for point in self.bp_plot.points]
+        new_bp_y = current_bp_y[1:] + [random.randint(115, 135)]
+        self.bp_plot.points = [(i, y) for i, y in enumerate(new_bp_y)]
 
 class PatientDashboardApp(App):
-    """
-    A Kivy app that displays a patient dashboard with vitals and graphs.
-    """
-
     def build(self):
-        """
-        Builds the Kivy UI.
-        """
-        # --- Main Layout ---
-        # This is the root widget
-        root_layout = BoxLayout(orientation='vertical', padding=dp(10), spacing=dp(10))
+        # Robustly load the KV file relative to this script
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        kv_file_path = os.path.join(current_dir, 'kv', 'patient.kv')
         
-        # Set a white background color for the whole app
-        with root_layout.canvas.before:
-            Color(1, 1, 1, 1) # <<< FIX 1: Changed to WHITE background (1, 1, 1, 1)
-            self.rect = Rectangle(size=root_layout.size, pos=root_layout.pos)
-        
-        # Update rect size on window resize
-        def update_root_rect(instance, value):
-            # This function correctly references self.rect created above
-            self.rect.pos = instance.pos
-            self.rect.size = instance.size
-        
-        # Bind the update function for resizing the background rectangle
-        root_layout.bind(pos=update_root_rect, size=update_root_rect)
+        try:
+            Builder.load_file("kv/patient.kv")
+        except FileNotFoundError:
+            print(f"\nERROR: Could not find KV file at: {kv_file_path}")
+            print("Please create a folder named 'kv' and place 'patient.kv' inside it.\n")
+            exit(1)
 
-        # --- 1. Title Label ---
-        title = Label(
-            text='Patient Dashboard',
-            font_size='32sp',  # sp = scale-independent pixels
-            bold=True,
-            size_hint=(1, 0.1), # Use 10% of vertical space
-            color=get_color_from_hex("#000000") # <<< FIX 2: Set title text color to BLACK
-        )
-        root_layout.add_widget(title)
+        return PatientDashboard()
 
-        # --- 2. Patient Info Section ---
-        info_layout = GridLayout(
-            cols=2,
-            size_hint=(1, 0.2), # Use 20% of vertical space
-            row_force_default=True,
-            row_default_height=dp(40)
-        )
-        
-        # Mock Patient Data
-        patient_data = {
-            "Patient Name:": "Chetan Sharma",
-            "Age:": "25",
-            "Room:": "305B",
-            "Condition:": "Stable (Post-Op)"
-        }
-        
-        # Populate patient info labels
-        black_color = get_color_from_hex("#000000")
-        for key, value in patient_data.items():
-            info_layout.add_widget(
-                Label(text=key, font_size='18sp', bold=True, halign='right', padding=[dp(20),0], color=black_color) # <<< FIX 3: Black text
-            )
-            info_layout.add_widget(
-                Label(text=value, font_size='18sp', halign='left', padding=[dp(20),0], color=black_color) # <<< FIX 3: Black text
-            )
-            
-        root_layout.add_widget(info_layout)
-
-        # --- 3. Current Vitals Section ---
-        vitals_title = Label(
-            text='Current Vitals',
-            font_size='24sp',
-            bold=True,
-            size_hint=(1, 0.1),
-            color=black_color # <<< FIX 4: Black text
-        )
-        root_layout.add_widget(vitals_title)
-
-        # We'll use a 2x2 grid for the main vitals
-        vitals_layout = GridLayout(cols=2, size_hint=(1, 0.2), spacing=dp(10))
-
-        # Helper function to create styled vital boxes
-        def create_vital_box(name, value, unit, hex_color):
-            box = BoxLayout(orientation='vertical')
-            
-            # This local function updates the box's background rectangle
-            def update_box_rect(instance, value):
-                instance.rect.pos = instance.pos
-                instance.rect.size = instance.size
-
-            with box.canvas.before:
-                Color(rgb=get_color_from_hex(hex_color))
-                # Store the Rectangle instance on the box widget
-                box.rect = Rectangle(pos=box.pos, size=box.size, radius=[dp(10)])
-            
-            # Text must be white against the colorful backgrounds
-            white_color = get_color_from_hex("#FFFFFF")
-
-            box.add_widget(Label(text=name, font_size='20sp', bold=True, color=white_color)) # <<< FIX 5: White text
-            box.add_widget(Label(text=value, font_size='28sp', bold=True, color=white_color)) # <<< FIX 5: White text
-            box.add_widget(Label(text=unit, font_size='16sp', color=white_color)) # <<< FIX 5: White text
-            
-            # Bind the update function for resizing the background
-            box.bind(pos=update_box_rect, size=update_box_rect)
-            return box
-
-        # Add vital boxes
-        vitals_layout.add_widget(
-            create_vital_box("Heart Rate", "78", "bpm", "#E74C3C") # Red
-        )
-        vitals_layout.add_widget(
-            create_vital_box("Blood Pressure", "122/81", "mmHg", "#3498DB") # Blue
-        )
-        vitals_layout.add_widget(
-            create_vital_box("SpO2", "97", "%", "#2ECC71") # Green
-        )
-        vitals_layout.add_widget(
-            create_vital_box("Temperature", "98.4", "°F", "#F39C12") # Orange
-        )
-        
-        root_layout.add_widget(vitals_layout)
-
-        # --- 4. Vitals Graph Section ---
-        graph_title = Label(
-            text='Vitals Trend (Last 12 Hours)',
-            font_size='24sp',
-            bold=True,
-            size_hint=(1, 0.1),
-            color=black_color # <<< FIX 6: Black text
-        )
-        root_layout.add_widget(graph_title)
-
-        # Mock data for the graphs
-        heart_rate_data = [
-            (0, 75), (1, 78), (2, 80), (3, 79), (4, 76), (5, 75),
-            (6, 77), (7, 78), (8, 82), (9, 80), (10, 78), (11, 78)
-        ]
-        
-        blood_pressure_data = [
-            (0, 120), (1, 122), (2, 125), (3, 124), (4, 121), (5, 120),
-            (6, 121), (7, 122), (8, 128), (9, 126), (10, 124), (11, 122)
-        ]
-
-        # Create the graph widget
-        graph_layout = AnchorLayout(anchor_x='center', anchor_y='center', size_hint=(1, 0.4))
-        
-        graph = Graph(
-            xlabel='Hour',
-            ylabel='Value',
-            x_ticks_minor=1,
-            x_ticks_major=2,
-            y_ticks_major=20,
-            y_grid_label=True,
-            x_grid_label=True,
-            padding=dp(5),
-            x_grid=True,
-            y_grid=True,
-            xmin=0,
-            xmax=11,
-            ymin=60, # Min y-value
-            ymax=140, # Max y-value
-            label_options={'color': black_color}, # <<< FIX 7: Black labels on graph axes
-            tick_color=get_color_from_hex("#CCCCCC") # Light gray grid lines for contrast
-        )
-
-        # Create the plots
-        hr_plot = MeshLinePlot(color=get_color_from_hex("#E74C3C")) # Red
-        hr_plot.points = heart_rate_data
-        graph.add_plot(hr_plot)
-        
-        bp_plot = MeshLinePlot(color=get_color_from_hex("#3498DB")) # Blue
-        bp_plot.points = blood_pressure_data
-        graph.add_plot(bp_plot)
-
-        # Add a simple legend
-        legend_layout = BoxLayout(size_hint=(1, None), height=dp(30), spacing=dp(20), padding=[dp(50),0])
-        legend_layout.add_widget(Label(text='[color=E74C3C]●[/color] Heart Rate (bpm)', markup=True, color=black_color)) # <<< FIX 8: Black text for legend
-        legend_layout.add_widget(Label(text='[color=3498DB]●[/color] BP Systolic (mmHg)', markup=True, color=black_color)) # <<< FIX 8: Black text for legend
-        root_layout.add_widget(legend_layout)
-
-        # Add the graph to its layout, and the layout to the root
-        graph_layout.add_widget(graph)
-        root_layout.add_widget(graph_layout)
-
-        return root_layout
-
-
-if __name__ == '__main__':
-    PatientDashboardApp().run()

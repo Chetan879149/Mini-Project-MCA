@@ -79,12 +79,28 @@ class LoginSignupScreen(Screen):
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM users WHERE aadhaar=? AND password=? AND role=?", (adhar, password, role))
         result = cursor.fetchone()
-        conn.close()
-        if result:
-            self.show_popup("Success", f"Welcome back, {role}!")
-            # Add navigation based on role here, if needed
+        
+        if result is None:
+            self.show_popup("Error", "User not found.")
         else:
-            self.show_popup("Error", "Invalid credentials.")
+            stored_password, stored_role = result
+            if stored_password == password:
+            # Role based screen redirection with typical permissions
+                stored_role_lower = stored_role.lower()
+                if stored_role_lower == 'patient':
+                    self.manager.current = 'patient'  # Patient dashboard
+                elif stored_role_lower == 'doctor':
+                    self.manager.current = 'doctor'  # Doctor dashboard
+                elif stored_role_lower == 'admin':
+                    self.manager.current = 'admin'   # Admin dashboard
+                elif stored_role_lower == 'user':
+                    self.manager.current = 'dashboard'  # General user/customer dashboard
+                else:
+                    self.show_popup("Error", "Invalid role assigned to user.")
+            else:
+                self.show_popup("Error", "Incorrect password.")
+
+        conn.close()
 
     # Signup
     def validate_signup(self):

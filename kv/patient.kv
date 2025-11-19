@@ -1,306 +1,242 @@
 #:import get_color_from_hex kivy.utils.get_color_from_hex
-#:import AsyncImage kivy.uix.image.AsyncImage
+#:import Graph kivy_garden.graph.Graph
 
-# --- GLOBAL STYLES ---
+# --- Custom Styles ---
+
 <Label>:
-    font_name: 'Roboto'
+    # Default style for all labels to ensure they are black (readable on white)
     color: get_color_from_hex("#000000")
 
-# --- IOSCard (Rounded Background) ---
-<IOSCard>:
+<BoldLabel@Label>:
+    bold: True
+
+# --- Custom Widget: VitalBox ---
+<VitalBox>:
+    orientation: 'vertical'
+    padding: dp(10)
     canvas.before:
         Color:
-            rgba: self.bg_color
+            rgba: root.box_color
         RoundedRectangle:
             pos: self.pos
             size: self.size
-            radius: self.radius
+            radius: [dp(10)]
+    
+    Label:
+        text: root.title
+        font_size: '18sp'
+        bold: True
+        color: 1, 1, 1, 1  # White text
+        size_hint_y: 0.3
+    
+    Label:
+        text: root.value
+        font_size: '28sp'
+        bold: True
+        color: 1, 1, 1, 1  # White text
+        size_hint_y: 0.5
 
-# --- Circular Avatar (Clipping logic) ---
-<CircularAvatar>:
+    Label:
+        text: root.unit
+        font_size: '14sp'
+        color: 1, 1, 1, 1  # White text
+        size_hint_y: 0.2
+
+# --- Main Dashboard Layout ---
+<PatientDashboard>:
+    orientation: 'vertical'
+    padding: dp(15)
+    spacing: dp(10)
+    
+    # White Background
     canvas.before:
-        StencilPush
-        RoundedRectangle:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
             pos: self.pos
             size: self.size
-            radius: [self.size[0]/2.0]
-        StencilUse
-    canvas.after:
-        StencilUnUse
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [self.size[0]/2.0]
-        StencilPop
 
-# --- ActionButton (The Quick Actions Grid Item) ---
-<ActionButton>:
-    orientation: 'vertical'
-    size_hint: None, None
-    size: dp(75), dp(80)
-    spacing: dp(8)
-    
-    # Icon Circle (This is where the error was in the previous code)
-    BoxLayout:
-        size_hint: None, None
-        size: dp(50), dp(50)
-        pos_hint: {'center_x': 0.5}
-        canvas.before:
-            Color:
-                rgba: root.bg_color  # <-- THIS NOW WORKS because bg_color is defined in Python
-            RoundedRectangle:
-                pos: self.pos
-                size: self.size
-                radius: [dp(25)]
-        Label:
-            text: root.icon
-            font_size: '24sp'
-            color: root.icon_color # <-- This also works now
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-    
-    # Text
-    Label:
-        text: root.text
-        font_size: '11sp'
-        color: get_color_from_hex("#333333")
-        halign: 'center'
+    # 1. Title
+    BoldLabel:
+        text: 'Patient Dashboard'
+        font_size: '32sp'
+        size_hint_y: 0.08
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
 
-<BottomNavItem>:
-    orientation: 'vertical'
-    size_hint_y: 1
-    spacing: dp(2)
-    Label:
-        text: root.icon
-        font_size: '22sp'
-        color: root.active_color if root.is_active else root.inactive_color
-    Label:
-        text: root.text
-        font_size: '10sp'
-        color: root.active_color if root.is_active else root.inactive_color
-
-# --- MAIN LAYOUT ---
-
-<FloatLayout>:
-    # Set ID for the scrollable content
-    DashboardScroll:
-        size_hint: 1, 1
-        size_hint_y: None
-        height: root.height - dp(80) 
-        pos_hint: {'top': 1}
-        
-        DashboardContent:
-            id: dashboard_content
-
-    # BOTTOM NAVIGATION BAR (Fixed)
-    BoxLayout:
-        size_hint_y: None
-        height: dp(80)
-        pos_hint: {'bottom': 1}
-        padding: [dp(20), dp(10), dp(20), dp(25)]
-        spacing: dp(10)
-        canvas.before:
-            Color:
-                rgba: get_color_from_hex("#FFFFFF")
-            Rectangle:
-                pos: self.pos
-                size: self.size
-            Color:
-                rgba: get_color_from_hex("#E5E5EA")
-            Line:
-                points: [self.x, self.y + self.height, self.x + self.width, self.y + self.height]
-                width: 1
-        
-        BottomNavItem:
-            icon: "🏠"
-            text: "Home"
-            is_active: True
-        BottomNavItem:
-            icon: "📅"
-            text: "Schedule"
-        BottomNavItem:
-            icon: "💬"
-            text: "Chat"
-        BottomNavItem:
-            icon: "👤"
-            text: "Profile"
-
-<DashboardContent>:
-    id: content_root
-    orientation: 'vertical'
-    size_hint_y: None
-    height: self.minimum_height
-    padding: [dp(20), dp(40), dp(20), dp(20)]
-    spacing: dp(20)
-
-    # --- HEADER ---
-    BoxLayout:
-        size_hint_y: None
-        height: dp(50)
-        spacing: dp(10)
-
-        BoxLayout:
-            orientation: 'vertical'
-            Label:
-                text: "Good Morning,"
-                font_size: '14sp'
-                color: get_color_from_hex("#8E8E93")
-                halign: 'left'
-                text_size: self.size
-            Label:
-                text: "Sarah Jenkins"
-                font_size: '24sp'
-                bold: True
-                halign: 'left'
-                text_size: self.size
-        
-        CircularAvatar:
-            source: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80'
-            size_hint: None, None
-            size: dp(50), dp(50)
-
-    # --- BANNER IMAGE ---
-    IOSCard:
-        size_hint_y: None
-        height: dp(140)
-        padding: 0
-        clip_to_layout: True
-
-        AsyncImage:
-            source: 'https://img.freepik.com/free-vector/flat-design-medical-center-landing-page_23-2148954368.jpg'
-            allow_stretch: True
-            keep_ratio: False
-            radius: [dp(18)]
-
-    # --- QUICK ACTIONS GRID ---
+    # 2. Patient Info Grid
     GridLayout:
         cols: 4
-        size_hint_y: None
-        height: dp(90)
+        size_hint_y: 0.12
         spacing: dp(10)
-
-        ActionButton:
-            text: "Doctor"
-            icon: "👨‍⚕️"
-            bg_color: get_color_from_hex("#E3F2FD")
-            icon_color: get_color_from_hex("#007AFF")
-
-        ActionButton:
-            text: "Pharmacy"
-            icon: "💊"
-            bg_color: get_color_from_hex("#FFF3E0")
-            icon_color: get_color_from_hex("#FF9500")
-
-        ActionButton:
-            text: "Hospital"
-            icon: "🏥"
-            bg_color: get_color_from_hex("#FFEBEE")
-            icon_color: get_color_from_hex("#FF3B30")
-
-        ActionButton:
-            text: "Ambulance"
-            icon: "🚑"
-            bg_color: get_color_from_hex("#E8F5E9")
-            icon_color: get_color_from_hex("#34C759")
-
-    # --- HEART RATE CARD (GRAPH) ---
-    Label:
-        text: "Health Vitals"
-        font_size: '18sp'
-        bold: True
-        size_hint_y: None
-        height: dp(30)
-        halign: 'left'
-        text_size: self.size
-
-    IOSCard:
-        orientation: 'vertical'
-        size_hint_y: None
-        height: dp(220)
-        padding: dp(15)
-        spacing: dp(10)
-
-        BoxLayout:
-            size_hint_y: None
-            height: dp(30)
-            Label:
-                text: "Heart Rate"
-                font_size: '16sp'
-                bold: True
-                halign: 'left'
-                text_size: self.size
-            Label:
-                text: "72 BPM"
-                font_size: '16sp'
-                bold: True
-                color: get_color_from_hex("#FF2D55")
-                halign: 'right'
-                text_size: self.size
         
-        # Graph Container (Filled by Python)
-        BoxLayout:
-            id: graph_container
-
-    # --- UPCOMING APPOINTMENT ---
-    Label:
-        text: "Upcoming Schedule"
-        font_size: '18sp'
-        bold: True
-        size_hint_y: None
-        height: dp(30)
-        halign: 'left'
-        text_size: self.size
-
-    IOSCard:
-        size_hint_y: None
-        height: dp(80)
-        padding: dp(15)
-        spacing: dp(15)
-        
-        # Date Box
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_x: None
-            width: dp(50)
-            canvas.before:
-                Color:
-                    rgba: get_color_from_hex("#F2F2F7")
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [dp(12)]
-            Label:
-                text: "12"
-                font_size: '18sp'
-                bold: True
-                pos_hint: {'center_x': 0.5}
-            Label:
-                text: "Jan"
-                font_size: '12sp'
-                color: get_color_from_hex("#8E8E93")
-                pos_hint: {'center_x': 0.5}
-
-        # Info
-        BoxLayout:
-            orientation: 'vertical'
-            Label:
-                text: "Dr. Emily Watson"
-                font_size: '16sp'
-                bold: True
-                halign: 'left'
-                text_size: self.size
-                valign: 'bottom'
-            Label:
-                text: "Cardiologist • 10:00 AM"
-                font_size: '12sp'
-                color: get_color_from_hex("#8E8E93")
-                halign: 'left'
-                text_size: self.size
-                valign: 'top'
-        
-        # Arrow
+        # Row 1
+        BoldLabel:
+            text: 'Patient Name:'
+            halign: 'right'
         Label:
-            text: "›"
-            font_size: '24sp'
-            color: get_color_from_hex("#C7C7CC")
+            text: 'Chetan '
+            halign: 'left'
+        BoldLabel:
+            text: 'Room:101'
+            halign: 'right'
+        Label:
+            text: '305B'
+            halign: 'left'
+
+        # Row 2
+        BoldLabel:
+            text: 'Age:'
+            halign: 'right'
+        Label:
+            text: '25'
+            halign: 'left'
+        BoldLabel:
+            text: 'Condition:'
+            halign: 'right'
+        Label:
+            text: 'Stable (Post-Op)'
+            halign: 'left'
+
+                
+
+    # 3. Vitals Section Title
+    BoldLabel:
+        text: 'Current Vitals'
+        font_size: '24sp'
+        size_hint_y: 0.08
+        text_size: self.size
+        halign: 'left'
+        valign: 'bottom'
+
+    # 4. Vitals Grid (The Colored Boxes)
+    GridLayout:
+        cols: 2
+        spacing: dp(15)
+        size_hint_y: 0.25
+        
+        VitalBox:
+            title: 'Heart Rate'
+            value: '78'
+            unit: 'bpm'
+            box_color: get_color_from_hex("#E74C3C") # Red
+
+        VitalBox:
+            title: 'Blood Pressure'
+            value: '122/81'
+            unit: 'mmHg'
+            box_color: get_color_from_hex("#3498DB") # Blue
+
+        VitalBox:
+            title: 'SpO2'
+            value: '97'
+            unit: '%'
+            box_color: get_color_from_hex("#2ECC71") # Green
+
+        VitalBox:
+            title: 'Temperature'
+            value: '98.4'
+            unit: '°F'
+            box_color: get_color_from_hex("#F39C12") # Orange
+
+    # 5. Graph Section Title
+    BoldLabel:
+        text: 'Vitals Trend (Last 12 Hours)'
+        font_size: '24sp'
+        size_hint_y: 0.08
+        text_size: self.size
+        halign: 'left'
+        valign: 'bottom'
+
+    # 6. Graph Container
+    AnchorLayout:
+        anchor_x: 'center'
+        anchor_y: 'center'
+        size_hint_y: 0.35
+        
+        Graph:
+            # --- THIS IS THE CORRECT PLACE FOR THE ID ---
+            id: vitals_graph 
+            xlabel: 'Hour'
+            ylabel: 'Value'
+            x_ticks_minor: 1
+            x_ticks_major: 2
+            y_ticks_major: 20
+            y_grid_label: True
+            x_grid_label: True
+            padding: dp(5)
+            x_grid: True
+            y_grid: True
+            xmin: 0
+            xmax: 11
+            ymin: 60
+            ymax: 140
+            # Graph Styling
+            label_options: {'color': get_color_from_hex("#000000"), 'bold': True}
+            background_color: 1, 1, 1, 1
+            tick_color: get_color_from_hex("#888888")
+            border_color: get_color_from_hex("#888888")
+
+    # 7. Legend
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: 0.05
+        spacing: dp(20)
+        padding: [dp(50), 0]
+        
+        # --- Item 1: Heart Rate ---
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: dp(5)
             size_hint_x: None
-            width: dp(20)
+            width: dp(160)
+            
+            # Draw a Red Circle
+            Widget:
+                size_hint: None, None
+                size: dp(16), dp(16)
+                pos_hint: {'center_y': 0.5}
+                canvas:
+                    Color:
+                        rgba: get_color_from_hex("#E74C3C")
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+            
+            # --- FIXED SECTION BELOW ---
+            Label:
+                text: 'Heart Rate (bpm)'
+                size_hint_y: 0.5
+                font_size: '16sp'
+                color: get_color_from_hex("#000000")
+                halign: 'left'
+                valign: 'middle'
+                text_size: self.size
+
+        # --- Item 2: Blood Pressure ---
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: dp(5)
+            size_hint_x: None
+            width: dp(180)
+            
+            # Draw a Blue Circle
+            Widget:
+                size_hint: None, None
+                size: dp(16), dp(16)
+                pos_hint: {'center_y': 0.5}
+                canvas:
+                    Color:
+                        rgba: get_color_from_hex("#3498DB")
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+            
+            Label:
+                text: 'BP Systolic (mmHg)'
+                font_size: '16sp'
+                color: get_color_from_hex("#000000")
+                halign: 'left'
+                valign: 'middle'
+                text_size: self.size
